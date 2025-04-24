@@ -160,13 +160,6 @@ curl -X POST http://localhost:8080/testpackage/1.0.0 \
 
 ---
 
-## 👨‍💻 Author
-
-Hüseyin Selen
-Full Stack Developer Candidate
-
----
-
 ## 📄 License
 
 This project is licensed under the MIT License.
