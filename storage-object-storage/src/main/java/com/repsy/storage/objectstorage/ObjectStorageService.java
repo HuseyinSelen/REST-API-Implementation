@@ -1,19 +1,21 @@
 package com.repsy.storage.objectstorage;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repsy.storage.StorageService;
+import com.repsy.storage.common.model.PackageMetadata;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.GetObjectArgs;
 import io.minio.errors.MinioException;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -22,6 +24,7 @@ public class ObjectStorageService implements StorageService {
 
     private final MinioClient minioClient;
     private final String bucketName;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     public void init() {
@@ -43,70 +46,86 @@ public class ObjectStorageService implements StorageService {
     }
 
     @Override
-public void store(String packageName, String version, MultipartFile meta, MultipartFile file) throws IOException {
-    try {
-        String basePath = packageName + "/" + version + "/";
-        System.out.println("📤 Dosyalar yükleniyor: " + basePath);
+    public void store(String packageName, String version, MultipartFile meta, MultipartFile file) throws IOException {
+        try {
+            if (meta.isEmpty()) {
+                throw new IOException("meta.json içeriği boş olamaz.");
+            }
 
-        // meta.json dosyasını yükle
-        minioClient.putObject(PutObjectArgs.builder()
-                .bucket(bucketName)
-                .object(basePath + "meta.json")
-                .stream(meta.getInputStream(), meta.getSize(), -1)
-                .contentType(meta.getContentType())
-                .build());
+            // JSON içeriğini kontrol et
+            PackageMetadata metadata = objectMapper.readValue(meta.getInputStream(), PackageMetadata.class);
 
-        // package.rep olarak yeniden adlandır ve yükle
-        minioClient.putObject(PutObjectArgs.builder()
-                .bucket(bucketName)
-                .object(basePath + "package.rep")
-                .stream(file.getInputStream(), file.getSize(), -1)
-                .contentType(file.getContentType())
-                .build());
+            if (metadata.getName().isBlank() ||
+                metadata.getVersion().isBlank() ||
+                metadata.getAuthor().isBlank()) {
+                throw new IOException("meta.json içindeki alanlar boş olamaz.");
+            }
 
-        System.out.println("✅ meta.json ve package.rep başarıyla yüklendi: " + basePath);
+            for (PackageMetadata.Dependency dep : metadata.getDependencies()) {
+                if (dep.getPackageName().isBlank() || dep.getVersion().isBlank()) {
+                    throw new IOException("Tüm dependency package ve version alanları dolu olmalıdır.");
+                }
+            }
 
-    } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
-        System.err.println("❌ MinIO store hatası: " + e.getMessage());
-        throw new IOException("MinIO store error: " + e.getMessage(), e);
+            String basePath = packageName + "/" + version + "/";
+            System.out.println("📤 Dosya yükleniyor: " + basePath + "package.rep");
+
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(basePath + "meta.json")
+                    .stream(meta.getInputStream(), meta.getSize(), -1)
+                    .contentType(meta.getContentType())
+                    .build());
+
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(basePath + "package.rep")
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
+
+            System.out.println("✅ Dosyalar başarıyla yüklendi: " + basePath);
+
+        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+            System.err.println("❌ MinIO store hatası: " + e.getMessage());
+            throw new IOException("MinIO store error: " + e.getMessage(), e);
+        }
     }
-}
 
     @Override
-public File load(String packageName, String version, String fileName) throws IOException {
-    try {
-        System.out.println("📂 [DEBUG] Gelen fileName: [" + fileName + "]");
-        System.out.println("➡ contains(\"..\")? " + fileName.contains(".."));
-        System.out.println("➡ isBlank()? " + fileName.isBlank());
+    public File load(String packageName, String version, String fileName) throws IOException {
+        try {
+            System.out.println("📂 [DEBUG] Gelen fileName: [" + fileName + "]");
+            System.out.println("➡ contains(\"..\")? " + fileName.contains(".."));
+            System.out.println("➡ isBlank()? " + fileName.isBlank());
 
-        if (fileName == null || fileName.contains("..") || fileName.isBlank()) {
-            System.err.println("❗ Geçersiz dosya adı tespit edildi: " + fileName);
-            return null; // ❗ Hata yerine null dön
+            if (fileName == null || fileName.contains("..") || fileName.isBlank()) {
+                System.err.println("❗ Geçersiz dosya adı tespit edildi: " + fileName);
+                return null;
+            }
+
+            String objectName = packageName + "/" + version + "/" + fileName;
+            System.out.println("📥 MinIO'dan dosya indiriliyor: " + objectName);
+
+            File tempFile = File.createTempFile("minio-", "-" + fileName);
+
+            try (InputStream stream = minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .build());
+                 FileOutputStream out = new FileOutputStream(tempFile)) {
+
+                stream.transferTo(out);
+            }
+
+            System.out.println("✅ Dosya indirildi: " + tempFile.getAbsolutePath());
+            return tempFile;
+
+        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+            System.err.println("❌ MinIO load hatası: " + e.getMessage());
+            throw new IOException("MinIO load error: " + e.getMessage(), e);
         }
-
-        String objectName = packageName + "/" + version + "/" + fileName;
-        System.out.println("📥 MinIO'dan dosya indiriliyor: " + objectName);
-
-        File tempFile = File.createTempFile("minio-", "-" + fileName);
-
-        try (InputStream stream = minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucketName)
-                .object(objectName)
-                .build());
-             FileOutputStream out = new FileOutputStream(tempFile)) {
-
-            stream.transferTo(out);
-        }
-
-        System.out.println("✅ Dosya indirildi: " + tempFile.getAbsolutePath());
-        return tempFile;
-
-    } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
-        System.err.println("❌ MinIO load hatası: " + e.getMessage());
-        throw new IOException("MinIO load error: " + e.getMessage(), e);
     }
-}
-
 
     @Override
     public byte[] retrieve(String packageName, String version, String type) throws IOException {

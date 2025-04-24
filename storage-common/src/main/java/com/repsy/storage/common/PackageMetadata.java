@@ -1,4 +1,4 @@
-package com.repsy.packagemanager.model;
+package com.repsy.storage.common.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;

@@ -3,7 +3,7 @@ package com.repsy.packagemanager.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repsy.packagemanager.entity.DependencyEntity;
 import com.repsy.packagemanager.entity.PackageEntity;
-import com.repsy.packagemanager.model.PackageMetadata;
+import com.repsy.storage.common.model.PackageMetadata;
 import com.repsy.packagemanager.repository.DependencyRepository;
 import com.repsy.packagemanager.repository.PackageRepository;
 import com.repsy.storage.StorageService;
