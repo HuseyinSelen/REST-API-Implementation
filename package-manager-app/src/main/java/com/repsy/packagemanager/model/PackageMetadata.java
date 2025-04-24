@@ -1,24 +1,36 @@
 package com.repsy.packagemanager.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 public class PackageMetadata {
 
+    @NotBlank(message = "Package name cannot be blank")
     private String name;
+
+    @NotBlank(message = "Version cannot be blank")
     private String version;
+
+    @NotBlank(message = "Author cannot be blank")
     private String author;
+
+    @NotNull(message = "Dependencies cannot be null")
+    @Valid
     private List<Dependency> dependencies;
 
-    // Inner class for dependencies
     public static class Dependency {
 
+        @NotBlank(message = "Dependency package name cannot be blank")
         @JsonProperty("package")
         private String packageName;
 
+        @NotBlank(message = "Dependency version cannot be blank")
         private String version;
 
-        // Constructors
         public Dependency() {}
 
         public Dependency(String packageName, String version) {
@@ -26,7 +38,6 @@ public class PackageMetadata {
             this.version = version;
         }
 
-        // Getters and setters
         public String getPackageName() {
             return packageName;
         }
@@ -44,7 +55,6 @@ public class PackageMetadata {
         }
     }
 
-    // Constructors
     public PackageMetadata() {}
 
     public PackageMetadata(String name, String version, String author, List<Dependency> dependencies) {
@@ -54,7 +64,6 @@ public class PackageMetadata {
         this.dependencies = dependencies;
     }
 
-    // Getters and setters
     public String getName() {
         return name;
     }
