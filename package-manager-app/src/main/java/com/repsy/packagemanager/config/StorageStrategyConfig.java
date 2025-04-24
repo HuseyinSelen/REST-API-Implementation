@@ -1,8 +1,8 @@
 package com.repsy.packagemanager.config;
 
-import com.repsy.storage.FileSystemStorageService;
-import com.repsy.storage.InMemoryStorageService;
 import com.repsy.storage.StorageService;
+import com.repsy.storage.filesystem.FileSystemStorageService;
+import com.repsy.storage.objectstorage.ObjectStorageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,21 +14,21 @@ public class StorageStrategyConfig {
     private String strategy;
 
     private final FileSystemStorageService fileSystemStorageService;
-    private final InMemoryStorageService inMemoryStorageService;
+    private final ObjectStorageService objectStorageService;
 
     public StorageStrategyConfig(
             FileSystemStorageService fileSystemStorageService,
-            InMemoryStorageService inMemoryStorageService
+            ObjectStorageService objectStorageService
     ) {
         this.fileSystemStorageService = fileSystemStorageService;
-        this.inMemoryStorageService = inMemoryStorageService;
+        this.objectStorageService = objectStorageService;
     }
 
     @Bean
     public StorageService storageService() {
         return switch (strategy.toLowerCase()) {
             case "file-system" -> fileSystemStorageService;
-            case "in-memory" -> inMemoryStorageService;
+            case "object-storage" -> objectStorageService;
             default -> throw new IllegalArgumentException("Desteklenmeyen storage strategy: " + strategy);
         };
     }

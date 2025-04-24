@@ -1,3 +1,2 @@
-com\repsy\storage\InMemoryStorageService.class
-com\repsy\storage\StorageService.class
-com\repsy\storage\FileSystemStorageService.class
+com\repsy\storage\filesystem\FileSystemStorageService.class
+com\repsy\storage\filesystem\InMemoryStorageService.class

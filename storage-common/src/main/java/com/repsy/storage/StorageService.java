@@ -7,5 +7,8 @@ import java.io.IOException;
 
 public interface StorageService {
     void store(String packageName, String version, MultipartFile meta, MultipartFile rep) throws IOException;
+
+    byte[] retrieve(String packageName, String version, String type) throws IOException;
+
     File load(String packageName, String version, String fileName) throws IOException;
 }

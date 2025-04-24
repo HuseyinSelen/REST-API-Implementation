@@ -2,34 +2,38 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Burası önemli: Ana pom.xml’e bağlıyoruz -->
     <parent>
         <groupId>com.repsy</groupId>
         <artifactId>package-manager</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>storage-file-system</artifactId>
-    <name>Storage File System</name>
+    <groupId>com.repsy.storage</groupId>
+    <artifactId>storage-common</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Storage Common</name>
 
     <dependencies>
-        <!-- Version belirtmiyoruz çünkü ana pom’dan alacak -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-web</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-web</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.repsy.storage</groupId>
-            <artifactId>storage-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.13.2</version>
+          <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

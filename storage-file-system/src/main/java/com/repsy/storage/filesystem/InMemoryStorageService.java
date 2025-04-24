@@ -1,5 +1,6 @@
-package com.repsy.storage;
+package com.repsy.storage.filesystem;
 
+import com.repsy.storage.StorageService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +44,12 @@ public class InMemoryStorageService implements StorageService {
             throw new RuntimeException("Failed to read file from memory", e);
         }
     }
+
+    @Override
+    public byte[] retrieve(String packageName, String version, String type) throws IOException {
+            throw new UnsupportedOperationException("InMemoryStorageService does not support retrieve.");
+    }
+
 
     private String packageKey(String packageName, String version, String fileName) {
         return packageName + "/" + version + "/" + fileName;
