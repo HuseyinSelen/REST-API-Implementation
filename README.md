@@ -18,9 +18,10 @@ Package Manager is a Spring Boot-based REST API for uploading and downloading so
 
 ## 🛠️ Tech Stack
 
-- Java 17
-- Spring Boot 3
+- Java 17 (LTS)
+- Spring Boot 3.x
 - Spring Data JPA (Hibernate)
+- Docker & Docker Compose
 - PostgreSQL
 - Maven (multi-module)
 - MinIO-compatible object storage (optional)
@@ -41,6 +42,7 @@ package-manager/
 │   ├── resources/               → application.properties
 ├── storage-file-system/         → File-based implementation of StorageService
 ```
+
 ---
 
 ## 📦 JSON Format (meta.json)
@@ -71,6 +73,42 @@ package-manager/
   ]
 }
 ```
+
+---
+
+## 🛠️ Installation
+
+### Prerequisites
+
+- Java 17+
+- Maven
+- Docker & Docker Compose
+
+### 1. Clone the repository
+
+```text
+git clone https://github.com/yourusername/package-manager.git
+cd package-manager
+```
+
+### 2. Start Docker containers (PostgreSQL)
+
+```bash
+docker-compose up -d
+```
+
+### 3. Build and run the application
+
+```bash
+# Clean and build the project
+mvn clean install
+
+# Run the application (from root directory)
+mvn spring-boot:run -pl package-manager-app
+```
+
+Application will be accessible at: http://localhost:8080
+
 ---
 
 ## 🧰 Configuration
@@ -84,28 +122,18 @@ spring.datasource.password=repsy123
 
 storage.strategy=file-system  # or object-storage
 ```
----
 
-## ⚙️ Build & Run
-
-```bash
-# Clean and build the project
-mvn clean install
-
-# Run the application (from root directory)
-mvn spring-boot:run -pl package-manager-app
-```
 ---
 
 ## 🧪 REST API Endpoints
 
-### 📤 Upload Package
+### 📤 Upload Package (Postman)
 
 - **Method**: `POST`
 - **URL**: `http://localhost:8080/testpackage/1.0.0`
 - **Form Data**:
   - `meta`: `meta.json` file
-  - `file`: `package.rep` (any binary file)
+  - `file`: `test.zip` (any binary file)
 
 ### 📥 Download Files
 
@@ -115,14 +143,14 @@ mvn spring-boot:run -pl package-manager-app
 - **Package File**:  
   `GET http://localhost:8080/api/packages/testpackage/1.0.0/package.rep`
 
-### 📄 Get Package Metadata
+### 📄 Get Package Info as JSON
 
 - **URL**:  
   `GET http://localhost:8080/api/packages/testpackage/1.0.0`
 
 ---
 
-## 🧪 Sample Upload with Curl
+## 🧪 Sample Upload with Curl (Git Bash)
 
 ```bash
 curl -X POST http://localhost:8080/testpackage/1.0.0 \
@@ -131,6 +159,7 @@ curl -X POST http://localhost:8080/testpackage/1.0.0 \
 ```
 
 ---
+
 ## 👨‍💻 Author
 
 Hüseyin Selen
