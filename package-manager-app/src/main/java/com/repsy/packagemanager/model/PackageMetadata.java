@@ -24,8 +24,8 @@ public class PackageMetadata {
 
     public static class Dependency {
 
-        @NotBlank(message = "Dependency package name cannot be blank")
         @JsonProperty("package")
+        @NotBlank(message = "Dependency package name cannot be blank")
         private String packageName;
 
         @NotBlank(message = "Dependency version cannot be blank")

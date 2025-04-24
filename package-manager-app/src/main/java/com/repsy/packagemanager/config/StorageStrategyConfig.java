@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StorageStrategyConfig {
 
+    // Uygulama config'den "storage.strategy" okunur. Yoksa default: file-system
     @Value("${storage.strategy:file-system}")
     private String strategy;
 

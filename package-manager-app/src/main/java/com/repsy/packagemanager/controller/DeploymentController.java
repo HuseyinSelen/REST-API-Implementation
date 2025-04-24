@@ -48,6 +48,11 @@ public class DeploymentController {
             @RequestPart("file") MultipartFile repFile
     ) {
         try {
+            if (metaFile.isEmpty() || repFile.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("meta veya package dosyası eksik.");
+            }
+
             // JSON'dan nesneye dönüştür
             PackageMetadata metadata = objectMapper.readValue(metaFile.getBytes(), PackageMetadata.class);
 
@@ -57,26 +62,40 @@ public class DeploymentController {
                 throw new ConstraintViolationException("Metadata doğrulaması başarısız", violations);
             }
 
-            // Path ve metadata eşleşmesini kontrol et
-            if (!packageName.equals(metadata.getName()) || !version.equals(metadata.getVersion())) {
+            // Path ve metadata eşleşmesini kontrol et (trim + case-insensitive)
+            String pathName = packageName.trim();
+            String pathVersion = version.trim();
+            String metaName = metadata.getName().trim();
+            String metaVersion = metadata.getVersion().trim();
+
+System.out.println("== Karşılaştırma Öncesi ==");
+System.out.println("Path Name     : [" + pathName + "]");
+System.out.println("Meta Name     : [" + metaName + "]");
+System.out.println("Path Version  : [" + pathVersion + "]");
+System.out.println("Meta Version  : [" + metaVersion + "]");
+System.out.println("İsim eşleşiyor?: " + pathName.equalsIgnoreCase(metaName));
+System.out.println("Versiyon eşleşiyor?: " + pathVersion.equalsIgnoreCase(metaVersion));
+
+            if (!pathName.equalsIgnoreCase(metaName) || !pathVersion.equalsIgnoreCase(metaVersion)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Metadata ile path bilgisi eşleşmiyor.");
+                        .body(String.format("Metadata ile path bilgisi eşleşmiyor. Path: %s/%s, Meta: %s/%s",
+                                pathName, pathVersion, metaName, metaVersion));
             }
 
             // Eski kayıt varsa sil
-            packageRepository.findByNameAndVersion(packageName, version)
+            packageRepository.findByNameAndVersion(pathName, pathVersion)
                     .ifPresent(packageRepository::delete);
 
             // Yeni kayıt ekle
-            PackageEntity entity = new PackageEntity(metadata.getName(), metadata.getVersion(), metadata.getAuthor());
+            PackageEntity entity = new PackageEntity(metaName, metaVersion, metadata.getAuthor());
             packageRepository.save(entity);
 
             // Bağımlılıkları ekle
             if (metadata.getDependencies() != null) {
                 for (PackageMetadata.Dependency dep : metadata.getDependencies()) {
                     DependencyEntity dependency = new DependencyEntity(
-                            dep.getPackageName(),
-                            dep.getVersion(),
+                            dep.getPackageName().trim(),
+                            dep.getVersion().trim(),
                             entity
                     );
                     dependencyRepository.save(dependency);
@@ -84,7 +103,7 @@ public class DeploymentController {
             }
 
             // Dosyaları sakla
-            storageService.store(packageName, version, metaFile, repFile);
+            storageService.store(pathName, pathVersion, metaFile, repFile);
 
             return ResponseEntity.ok("Paket başarıyla yüklendi.");
 
