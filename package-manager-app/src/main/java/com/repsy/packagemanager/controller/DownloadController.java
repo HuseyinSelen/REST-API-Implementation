@@ -21,32 +21,33 @@ public class DownloadController {
     }
 
     @GetMapping("/{packageName}/{version}/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(
-            @PathVariable String packageName,
-            @PathVariable String version,
-            @PathVariable String fileName
-    ) {
-        try {
-            if (fileName.contains("..")) {
-                return ResponseEntity.badRequest().body(null);
-            }
-
-            File file = storageService.load(packageName, version, fileName);
-            if (!file.exists()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Resource resource = new FileSystemResource(file);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
-                    .contentLength(file.length())
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(null);
+public ResponseEntity<Resource> downloadFile(
+        @PathVariable String packageName,
+        @PathVariable String version,
+        @PathVariable String fileName
+) {
+    try {
+        if (fileName == null || fileName.contains("..") || fileName.isBlank()) {
+            return ResponseEntity.badRequest().build();
         }
+
+        File file = storageService.load(packageName, version, fileName);
+        if (file == null || !file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource resource = new FileSystemResource(file);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                .contentLength(file.length())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).build();
     }
+}
+
 }
