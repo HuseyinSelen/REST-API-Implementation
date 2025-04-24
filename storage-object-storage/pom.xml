@@ -13,7 +13,7 @@
 
     <groupId>com.repsy.storage</groupId>
     <artifactId>storage-object-storage</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Storage Object Storage</name>
@@ -55,5 +55,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+      <repository>
+        <id>repsy</id>
+        <name>rest-api-implementation</name>
+        <url>https://repo.repsy.io/mvn/huseyin/rest-api-implementation</url>
+      </repository>
+    </distributionManagement>
+
 
 </project>
