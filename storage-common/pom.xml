@@ -13,7 +13,7 @@
 
     <groupId>com.repsy.storage</groupId>
     <artifactId>storage-common</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>Storage Common</name>
@@ -44,11 +44,11 @@
         <version>3.0.2</version>
     </dependency>
 
-    <dependency>
-    <groupId>org.hibernate.validator</groupId>
-    <artifactId>hibernate-validator</artifactId>
-    <version>8.0.1.Final</version>
-</dependency>
+      <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>8.0.1.Final</version>
+      </dependency>
     </dependencies>
 
     <distributionManagement>
