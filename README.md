@@ -78,7 +78,7 @@ package-manager/
 
 ---
 
-## 🛠️ Installation
+## 🚀 Start the Project with Docker Compose
 
 ### Prerequisites
 
@@ -94,38 +94,23 @@ git clone https://github.com/yourusername/package-manager.git
 cd package-manager
 ```
 
-### 2. Start Docker containers (PostgreSQL)
+### 2. Run all services (PostgreSQL + Application) together
 
 ```bash
-docker-compose up -d
+docker-compose up --build
 ```
+
+- PostgreSQL will start automatically.
+- Spring Boot application will be built and started.
+- Application will be available at: http://localhost:8080
 
 ### 3. Start MinIO (if using object-storage strategy)
 
 ```bash
-docker run -d -p 9002:9000 -p 9003:9001 --name minio2 --restart always -e "MINIO_ROOT_USER=admin" -e "MINIO_ROOT_PASSWORD=12345678" quay.io/minio/minio server /data --console-address ":9003"
+docker run -d -p 9002:9000 -p 9003:9001 --name minio --restart always -e "MINIO_ROOT_USER=admin" -e "MINIO_ROOT_PASSWORD=12345678" quay.io/minio/minio server /data --console-address ":9003"
 ```
 
 Then visit http://localhost:9001, log in with admin / 12345678 and create a new bucket (e.g. packages) called **packages** before using the installation API.
-
-### 3. Build and run the application
-
-```bash
-# Clean and build the project
-mvn clean install
-```
-
-```bash
-# Go to the application folder
-cd package-manager-app
-```
-
-```bash
-# Run the application (from root directory)
-mvn spring-boot:run 
-```
-
-Application will be accessible at: http://localhost:8080
 
 ---
 
@@ -136,8 +121,8 @@ Application will be accessible at: http://localhost:8080
 ```bash
 spring.application.name=package-manager
 
-# PostgreSQL bağlantısı
-spring.datasource.url=jdbc:postgresql://localhost:5432/repsydb
+# PostgreSQL bağlantısı - localhost yerine 'db' yazıldı
+spring.datasource.url=jdbc:postgresql://db:5432/repsydb
 spring.datasource.username=repsyuser
 spring.datasource.password=repsy123
 
@@ -145,22 +130,19 @@ spring.datasource.password=repsy123
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 
-# Sunucu portu (istersen özelleştirebilirsin)
+# Sunucu portu
 server.port=8080
 
-# Dosya sistemi kullanmak için:
-#storage.strategy=file-system
+# Object Storage (MinIO)
 storage.strategy=object-storage
-
-
-# Bellek içi strateji kullanmak için:
-# storage.strategy=in-memory
 minio.url=http://localhost:9000
 minio.accessKey=admin
 minio.secretKey=12345678
 minio.bucket=packages
 
+# Monitoring
 management.endpoints.web.exposure.include=health,info
 management.endpoint.health.show-details=always
 ```
