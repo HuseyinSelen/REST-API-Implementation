@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.repsy.storage</groupId>
             <artifactId>storage-common</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 

@@ -37,4 +37,10 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <distributionManagement>
+  <repository>
+    <id>repsy</id>
+    <url>https://repo.repsy.io/mvn/huseyin/rest-api-implementation</url>
+  </repository>
+</distributionManagement>
 </project>
