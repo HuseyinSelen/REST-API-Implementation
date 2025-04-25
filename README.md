@@ -202,6 +202,30 @@ curl -X POST http://localhost:8080/testpackage/1.0.0 \
 
 ---
 
+## ⚠️ Note on External Dependencies
+
+This project depends on private Maven artifacts hosted on [Repsy.io](https://repsy.io).
+
+To build this project, make sure your `~/.m2/settings.xml` contains your Repsy credentials:
+
+```xml
+<server>
+  <id>repsy</id>
+  <username>your_repsy_username</username>
+  <password>your_repsy_token</password>
+</server>
+```
+
+---
+
+## 🌐 Project Links
+
+🔗 GitHub Repository: https://github.com/HuseyinSelen/REST-API-Implementation.git
+
+🔗 Repsy Maven Repository: https://repsy.io/mvn/huseyin/rest-api-implementation
+
+--- 
+
 ## 📄 License
 
 MIT License © 2025 Hüseyin SELEN
