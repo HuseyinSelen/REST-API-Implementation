@@ -104,7 +104,7 @@ docker-compose up --build
 - Spring Boot application will be built and started.
 - Application will be available at: http://localhost:8080
 
-### 3. Start MinIO (if using object-storage strategy)
+### 3. Start MinIO (Optional)
 
 ```bash
 docker run -d -p 9002:9000 -p 9003:9001 --name minio --restart always -e "MINIO_ROOT_USER=admin" -e "MINIO_ROOT_PASSWORD=12345678" quay.io/minio/minio server /data --console-address ":9003"
@@ -157,7 +157,7 @@ management.endpoint.health.show-details=always
 - **URL**: `http://localhost:8080/testpackage/1.0.0`
 - **Form Data**:
   - `meta`: `meta.json` file
-  - `file`: `test.zip` (any binary file)
+  - `file`: `test.zip` (any binary file will be saved as package.rep)
 
 ### 📥 Download Files
 
