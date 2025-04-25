@@ -25,7 +25,7 @@ Package Manager is a Spring Boot-based REST API for uploading and downloading so
 - PostgreSQL
 - Maven (multi-module)
 - MinIO-compatible object storage (optional)
-- Curl for testing uploads
+- Postman for testing uploads
 
 ---
 
@@ -39,8 +39,10 @@ package-manager/
 │   ├── model/                   → DTOs and metadata models
 │   ├── repository/              → Spring Data JPA repositories
 │   ├── config/                  → Storage strategy configuration
-│   ├── resources/               → application.properties
+│   └── resources/               → application.properties
+├── storage-common/              → Shared StorageService interface and metadata model
 ├── storage-file-system/         → File-based implementation of StorageService
+├── storage-object-storage/      → Object-based implementation (MinIO)
 ```
 
 ---
@@ -83,6 +85,7 @@ package-manager/
 - Java 17+
 - Maven
 - Docker & Docker Compose
+- Curl or Postman (for API Testing)
 
 ### 1. Clone the repository
 
@@ -97,14 +100,29 @@ cd package-manager
 docker-compose up -d
 ```
 
+### 3. Start MinIO (if using object-storage strategy)
+
+```bash
+docker run -d -p 9002:9000 -p 9003:9001 --name minio2 --restart always -e "MINIO_ROOT_USER=admin" -e "MINIO_ROOT_PASSWORD=12345678" quay.io/minio/minio server /data --console-address ":9003"
+```
+
+Then visit http://localhost:9001, log in with admin / 12345678 and create a new bucket (e.g. packages) called **packages** before using the installation API.
+
 ### 3. Build and run the application
 
 ```bash
 # Clean and build the project
 mvn clean install
+```
 
+```bash
+# Go to the application folder
+cd package-manager-app
+```
+
+```bash
 # Run the application (from root directory)
-mvn spring-boot:run -pl package-manager-app
+mvn spring-boot:run 
 ```
 
 Application will be accessible at: http://localhost:8080
@@ -116,11 +134,35 @@ Application will be accessible at: http://localhost:8080
 ### 🔧 application.properties
 
 ```bash
+spring.application.name=package-manager
+
+# PostgreSQL bağlantısı
 spring.datasource.url=jdbc:postgresql://localhost:5432/repsydb
 spring.datasource.username=repsyuser
 spring.datasource.password=repsy123
 
-storage.strategy=file-system  # or object-storage
+# Hibernate/JPA ayarları
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# Sunucu portu (istersen özelleştirebilirsin)
+server.port=8080
+
+# Dosya sistemi kullanmak için:
+#storage.strategy=file-system
+storage.strategy=object-storage
+
+
+# Bellek içi strateji kullanmak için:
+# storage.strategy=in-memory
+minio.url=http://localhost:9000
+minio.accessKey=admin
+minio.secretKey=12345678
+minio.bucket=packages
+
+management.endpoints.web.exposure.include=health,info
+management.endpoint.health.show-details=always
 ```
 
 ---
@@ -162,4 +204,4 @@ curl -X POST http://localhost:8080/testpackage/1.0.0 \
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+MIT License © 2025 Hüseyin SELEN
